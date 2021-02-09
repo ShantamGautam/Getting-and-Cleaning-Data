@@ -1,34 +1,20 @@
-#Reading activity and feature labels
+# Getting-and-Cleaning-Data-Course-Project
+Course Project relating to the course Getting and Cleaning Data offered by Johns Hopkins University on Coursera
 
-activity_labels <- read.table("./UCI HAR Dataset/activity_labels.txt") features <- read.table("./UCI HAR Dataset/features.txt")
+There is only one script runAnalysis.R it contains two functions **cleanData()** and **createDataset()**
 
-#Reading test data
-
-subject_test <- read.table("./UCI HAR Dataset/test/subject_test.txt") X_test <- read.table("./UCI HAR Dataset/test/X_test.txt") y_test <- read.table("./UCI HAR Dataset/test/y_test.txt")
-
-#Reading train data
-
-subject_train <- read.table("./UCI HAR Dataset/train/subject_train.txt") X_train <- read.table("./UCI HAR Dataset/train/X_train.txt") y_train <- read.table("./UCI HAR Dataset/train/y_train.txt")
-
-#Merging the training and the test sets to create one data set
-
-test <- cbind(subject_test, y_test, X_test) train <- cbind(subject_train, y_train, X_train) merged <- rbind(test, train)
-
-#Extracting only the measurements on the mean and standard deviation for each measurement
-
-allNames <- c("subject", "activity", as.character(features$V2)) meanStdColumns <- grep("subject|activity|[Mm]ean|std", allNames, value = FALSE) extracted <- merged[ ,meanStdColumns]
-
-#Using descriptive activity names to name the activities in the data set
-
-names(activity_labels) <- c("activityNumber", "activityName") extracted$V1.1 <- activity_labels$activityName[extracted$V1.1]
-
-#labeling the data set with descriptive variable names
-
-Names <- allNames[meanStdColumns]
-Names <- gsub("mean", "Mean", Names) Names <- gsub("std", "Std", Names) Names <- gsub("gravity", "Gravity", Names) Names <- gsub("[[:punct:]]", "", Names) Names <- gsub("^t", "time", Names) Names <- gsub("^f", "frequency", Names) Names <- gsub("^anglet", "angleTime", Names) names(extracted) <- Names
-
-#Creating a second, independent tidy data set with the average of each variable for each activity and each subject
-
-library(dplyr) tidyDataset <- extracted %>% group_by(activity, subject) %>% summarise_all(funs(mean))
-
-write.table(tidyDataset, file = "tidyDataset.txt", row.names = FALSE)
+## cleanData() : 
+This function does the following work:
+               
+* Loads all the data into dataframes.
+* Merges the training set and testing set to create one complete dataset and also binds the activity labels and subject_id.
+* Extracts only the mean and standard deviation variables of the dataset
+* Renames variables in dataset to better decsriptive names 
+* Returns the cleaned data
+## createDataset() : 
+This function does the following work:
+* Splits the dataset(R dataframe) returned by cleanData() according to different subjects(person on whom data was collected).
+* Takes mean of all variables for each activity and each subject.
+* Creates a new dataframe containing all the calculated measurements in above step.
+* Adds a column giving the Description of the activity.
+* writes this dataframe to a csvfile to create a tidy dataset.
